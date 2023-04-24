@@ -16,10 +16,14 @@ struct node {
     int freePointer;
     struct node* pointers[MAX_POINTERS];
     struct node* LRpointers[2];
+    struct node* parentPointer;
 };
 
 void insertKey(int key);
 struct node* createNode(bool isLeaf, bool isMostLeft, bool isMostRight);
+struct node** split(struct node* leaf, int key);
+
+
 void insertIntoLeaf(struct node* leaf, int key);
 void insert_into_parent(struct node* left, int key, struct node* right);
 void insert_into_new_root(struct node* left, int key, struct node* right);
