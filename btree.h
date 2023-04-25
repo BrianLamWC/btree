@@ -3,32 +3,39 @@
 #ifndef BPLUSTREE_H
 #define BPLUSTREE_H
 
-#define MAX_KEYS 3
+#define MAX_LEAF_KEYS 3
+#define MAX_PARENT_KEYS 3
 #define MAX_LRPOINTERS 2
-#define MAX_POINTERS (MAX_KEYS + 1)
+#define MAX_POINTERS (MAX_PARENT_KEYS + 1)
 
-struct node {
+struct leafNode{
     int numOfKeys;
-    bool isLeaf;
     bool isMostLeft;
     bool isMostRight;
-    int keys[MAX_KEYS];
+    int keys[MAX_LEAF_KEYS];
     int freePointer;
-    struct node* pointers[MAX_POINTERS];
-    struct node* LRpointers[2];
-    struct node* parentPointer;
+    struct leafNode* LRpointers[MAX_LRPOINTERS];
+    struct parentNode* parentPointer;
 };
 
-void insertKey(int key);
-struct node* createNode(bool isLeaf, bool isMostLeft, bool isMostRight);
-struct node** split(struct node* leaf, int key);
+struct parentNode{
+    int numOfKeys;
+    bool isMostLeft;
+    bool isMostRight;
+    int keys[MAX_PARENT_KEYS];
+    int freePointer;
+    struct leafNode* pointers[MAX_POINTERS];
+};
 
-
-void insertIntoLeaf(struct node* leaf, int key);
-void insert_into_parent(struct node* left, int key, struct node* right);
-void insert_into_new_root(struct node* left, int key, struct node* right);
+struct leafNode* createLeafNode(bool isMostLeft, bool isMostRight);
+void split(struct leafNode* leaf, struct parentNode* parent,int key);
+void insertIntoLeaf(struct leafNode* leaf, int key);
+void insertIntoParent(struct leafNode* parent, int key);
 
 #endif
+
+// void insert_into_new_root(struct leafNode* left, int key, struct leafNode* right);
+// void callibrateNodes(struct leafNode* oldNode, struct leafNode* newNode, struct leafNode* parentNode);
 
 //In an internal node of a B+tree, the keys array contains the "splitting" keys that divide the search keys between the child nodes.
 //The pointers array in an internal node contains pointers to the child nodes. 

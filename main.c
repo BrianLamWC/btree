@@ -4,7 +4,7 @@
 
 int main() {
 
-    struct node* root = createNode(1,0,0);
+    struct leafNode* root = createLeafNode(0,0);
 
     insertIntoLeaf(root, 3);
     insertIntoLeaf(root, 1);

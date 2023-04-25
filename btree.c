@@ -4,36 +4,54 @@
 #include <stdbool.h>
 #include <math.h>
 
-void insertionSort(int* arr, int arrSize, struct node* node);
-void printNode(struct node* node);
-bool checkNodeCapacity(struct node* node);
+void insertionSort(int* arr, int arrSize, struct leafNode* node);
+void printNode(struct leafNode* node);
+bool checkNodeCapacity(struct leafNode* node);
 
-struct node* createNode(bool isLeaf, bool isMostLeft, bool isMostRight){
-    struct node* newNode = malloc(sizeof(struct node));
-    newNode->isLeaf = isLeaf;
-    newNode->isMostLeft = isMostLeft;
-    newNode->isMostRight = isMostRight;
-    newNode->numOfKeys = 0;
-    newNode->freePointer = 0;
-    newNode->parentPointer = NULL;
+struct leafNode *createLeafNode(bool isMostLeft, bool isMostRight){
+    struct leafNode* newLeaf = malloc(sizeof(struct leafNode));
+    newLeaf->isMostLeft = isMostLeft;
+    newLeaf->isMostRight = isMostRight;
+    newLeaf->numOfKeys = 0;
+    newLeaf->freePointer = 0;
 
-    for (int i = 0; i < MAX_KEYS; i++) {
-        newNode->keys[i] = 0;
-    }
-
-    for (int i = 0; i < MAX_POINTERS; i++) {
-        newNode->pointers[i] = NULL;
+    for (int i = 0; i < MAX_LEAF_KEYS; i++) {
+        newLeaf->keys[i] = 0;
     }
 
     for (int i = 0; i < MAX_LRPOINTERS; i++) {
-        newNode->LRpointers[i] = NULL;
+        newLeaf->LRpointers[i] = NULL;
     }
 
-    return newNode;
+    newLeaf->parentPointer = NULL;
+
+    return newLeaf;
 }
 
-void insertIntoLeaf(struct node* leaf, int key){
-    if (leaf->numOfKeys == MAX_KEYS)
+struct parentNode* createParentNode(bool isMostLeft, bool isMostRight)
+{
+    struct parentNode* newParent = malloc(sizeof(struct parentNode));
+    newParent->isMostLeft = isMostLeft;
+    newParent->isMostRight = isMostRight;
+    newParent->numOfKeys = 0;
+    newParent->freePointer = 0;
+
+    for (int i = 0; i < MAX_PARENT_KEYS; i++)
+    {
+        newParent->keys[i] = 0;
+    }
+
+    for (int i = 0; i < MAX_POINTERS; i++)
+    {
+        newParent->pointers[i] = NULL;
+    }
+
+    return newParent;
+}
+
+void insertIntoLeaf(struct leafNode* leaf, int key){
+
+    if (leaf->numOfKeys == MAX_LEAF_KEYS)
     {
 
         if(leaf->isMostLeft)
@@ -57,7 +75,7 @@ void insertIntoLeaf(struct node* leaf, int key){
 
             if (leaf->LRpointers[0] == NULL && leaf->LRpointers[1] == NULL)
             {
-                split(leaf, key);
+                split(leaf, NULL,key);
             }else
             {
                 if (checkNodeCapacity(leaf->LRpointers[0]))
@@ -80,7 +98,7 @@ void insertIntoLeaf(struct node* leaf, int key){
         printf("Inserting: %d to %p\n",key, &leaf);
         leaf->keys[leaf->freePointer] = key;
 
-        if (leaf->freePointer < MAX_KEYS - 1)
+        if (leaf->freePointer < MAX_LEAF_KEYS - 1)
         {
             leaf->freePointer++;
         }
@@ -91,43 +109,57 @@ void insertIntoLeaf(struct node* leaf, int key){
     }
 }
 
-struct node** split(struct node* node, int key){
-    int tempKeys[MAX_KEYS + 1];
-    int newNodeNumOfKeys = ceil((float)MAX_KEYS/2);
-    struct node** returnNodes = malloc(2 * sizeof(struct node*));
+void split(struct leafNode* leaf, struct parentNode* parent,int key){
 
-    for (int i = 0; i < MAX_KEYS; i++) { //copy keys into temp list
-        tempKeys[i] = node->keys[i];
-    }
-
-    tempKeys[MAX_KEYS + 1] = key; //add last key
-
-    insertionSort(tempKeys, MAX_KEYS + 1,NULL);
-
-    if (node->parentPointer == NULL) // no parents
+    if (parent == NULL)
     {
-        struct node* parent = createNode(0,0,0);
-        struct node* newLeaf = createNode(1,0,1); //new leaf on the right
-        node->isMostLeft = true; //old leaf on the left
-        
-        for (int i = MAX_KEYS - newNodeNumOfKeys; i < MAX_KEYS; i++) { 
-            node->keys[i] = 0;
+        int tempKeys[MAX_LEAF_KEYS + 1];
+        int newNodeNumOfKeys = ceil((float)MAX_LEAF_KEYS / 2);
+
+        for (int i = 0; i < MAX_LEAF_KEYS; i++)
+        { // copy keys into temp list
+            tempKeys[i] = leaf->keys[i];
         }
 
-        for (int i = 0; i < MAX_KEYS - newNodeNumOfKeys; i++) { 
-            insertIntoLeaf(newLeaf, node->keys[i]);
+        tempKeys[MAX_LEAF_KEYS + 1] = key; // add last key
+
+        insertionSort(tempKeys, MAX_LEAF_KEYS + 1, NULL);
+
+        if (leaf->parentPointer == NULL) // no parents
+        {
+            struct parentNode *parent = createParentNode(0, 0);
+            struct leafNode *newLeaf = createLeafNode(0, 1); // new leaf on the right
+            leaf->isMostLeft = true;                          // old leaf on the left
+
+            for (int i = MAX_LEAF_KEYS - newNodeNumOfKeys; i < MAX_LEAF_KEYS; i++)
+            {
+                leaf->keys[i] = 0;
+            }
+
+            for (int i = 0; i < MAX_LEAF_KEYS - newNodeNumOfKeys; i++)
+            {
+                insertIntoLeaf(newLeaf, leaf->keys[i]);
+            }
+
+            //callibrateNodes(leaf, newLeaf, parent);
         }
-
-        returnNodes[0] = parent;
-        returnNodes[1] = newLeaf;
-
     }
-    
-    return returnNodes;
 
 }
 
-void insertionSort(int* arr, int arrSize, struct node* node) {
+// void callibrateNode(struct node* oldNode, struct node* newNode, struct node* parentNode){
+
+//     if (parentNode == NULL)
+//     {
+//         printf("no parent Node\n");
+//     }else{
+//         parentNode->keys[1];
+//     }
+    
+
+// }
+
+void insertionSort(int* arr, int arrSize, struct leafNode* leaf) {
     int key, j;
 
     if (arr != NULL && arrSize > 0) {
@@ -143,28 +175,28 @@ void insertionSort(int* arr, int arrSize, struct node* node) {
             arr[j + 1] = key;
         }
     }
-    else if (node != NULL && node->numOfKeys > 0) {
-        for (int i = 0; i < node->numOfKeys; i++) {
-            key = node->keys[i];
+    else if (leaf != NULL && leaf->numOfKeys > 0) {
+        for (int i = 0; i < leaf->numOfKeys; i++) {
+            key = leaf->keys[i];
             j = i - 1;
 
-            while (j >= 0 && node->keys[j] > key) {
-                node->keys[j + 1] = node->keys[j];
+            while (j >= 0 && leaf->keys[j] > key) {
+                leaf->keys[j + 1] = leaf->keys[j];
                 j--;
             }
 
-            node->keys[j + 1] = key;
+            leaf->keys[j + 1] = key;
         }
     }
 }
 
-void printNode(struct node* node){
+void printNode(struct leafNode* node){
     for (int i = 0; i < node->numOfKeys; i++)
         printf("%d ", node->keys[i]);
     printf("\n");
 }
 
-bool checkNodeCapacity(struct node* node) {
-    int spaceLeft = MAX_KEYS - node->numOfKeys;
+bool checkNodeCapacity(struct leafNode* leaf){
+    int spaceLeft = MAX_LEAF_KEYS - leaf->numOfKeys;
     return spaceLeft > 0;
 }
