@@ -24,13 +24,15 @@ struct parentNode{
     bool isMostRight;
     int keys[MAX_PARENT_KEYS];
     int freePointer;
-    struct leafNode* pointers[MAX_POINTERS];
+    int freeChildPointer;
+    struct leafNode* childPointers[MAX_POINTERS];
 };
 
 struct leafNode* createLeafNode(bool isMostLeft, bool isMostRight);
 void split(struct leafNode* leaf, struct parentNode* parent,int key);
 void insertIntoLeaf(struct leafNode* leaf, int key);
-void insertIntoParent(struct leafNode* parent, int key);
+void insertIntoParent(struct parentNode* parent, int key);
+void linkNodes(struct leafNode* oldNode, struct leafNode* newNode, struct parentNode* parentNode);
 
 #endif
 

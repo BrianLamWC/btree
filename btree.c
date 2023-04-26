@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <math.h>
 
-void insertionSort(int* arr, int arrSize, struct leafNode* node);
+void insertionSort(int* arr, int arrSize, struct leafNode* leaf, struct parentNode* parent);
 void printNode(struct leafNode* node);
 bool checkNodeCapacity(struct leafNode* node);
 
@@ -35,6 +35,7 @@ struct parentNode* createParentNode(bool isMostLeft, bool isMostRight)
     newParent->isMostRight = isMostRight;
     newParent->numOfKeys = 0;
     newParent->freePointer = 0;
+    newParent->freeChildPointer = 0;
 
     for (int i = 0; i < MAX_PARENT_KEYS; i++)
     {
@@ -43,7 +44,7 @@ struct parentNode* createParentNode(bool isMostLeft, bool isMostRight)
 
     for (int i = 0; i < MAX_POINTERS; i++)
     {
-        newParent->pointers[i] = NULL;
+        newParent->childPointers[i] = NULL;
     }
 
     return newParent;
@@ -51,7 +52,7 @@ struct parentNode* createParentNode(bool isMostLeft, bool isMostRight)
 
 void insertIntoLeaf(struct leafNode* leaf, int key){
 
-    if (leaf->numOfKeys == MAX_LEAF_KEYS)
+    if (leaf->numOfKeys >= MAX_LEAF_KEYS)
     {
 
         if(leaf->isMostLeft)
@@ -95,7 +96,7 @@ void insertIntoLeaf(struct leafNode* leaf, int key){
         
     }else{
         printf("free pointer: %d\n",leaf->freePointer);
-        printf("Inserting: %d to %p\n",key, &leaf);
+        printf("Inserting: %d to leaf node %p\n",key, &leaf);
         leaf->keys[leaf->freePointer] = key;
 
         if (leaf->freePointer < MAX_LEAF_KEYS - 1)
@@ -103,10 +104,31 @@ void insertIntoLeaf(struct leafNode* leaf, int key){
             leaf->freePointer++;
         }
         leaf->numOfKeys++;
-        insertionSort(NULL, 0,leaf);
+        insertionSort(NULL, 0, leaf, NULL);
         printNode(leaf);
         
     }
+}
+
+void insertIntoParent(struct parentNode *parent, int key){
+    if (parent->numOfKeys >= MAX_PARENT_KEYS)
+    {
+        printf("parent node full\n");
+    }else{
+
+        printf("free pointer: %d\n", parent->freePointer);
+        printf("Inserting to: %d to parent node %p\n", key, &parent);
+        parent->keys[parent->freePointer] = key;
+
+        if (parent->freePointer < MAX_PARENT_KEYS - 1)
+        {
+            parent->freePointer++;
+        }
+        parent->numOfKeys++;
+
+        //printNode(parent);
+    }
+    
 }
 
 void split(struct leafNode* leaf, struct parentNode* parent,int key){
@@ -123,7 +145,7 @@ void split(struct leafNode* leaf, struct parentNode* parent,int key){
 
         tempKeys[MAX_LEAF_KEYS + 1] = key; // add last key
 
-        insertionSort(tempKeys, MAX_LEAF_KEYS + 1, NULL);
+        insertionSort(tempKeys, MAX_LEAF_KEYS + 1, NULL, NULL);
 
         if (leaf->parentPointer == NULL) // no parents
         {
@@ -141,25 +163,24 @@ void split(struct leafNode* leaf, struct parentNode* parent,int key){
                 insertIntoLeaf(newLeaf, leaf->keys[i]);
             }
 
-            //callibrateNodes(leaf, newLeaf, parent);
+            linkNodes(leaf, newLeaf, parent);
         }
     }
 
 }
 
-// void callibrateNode(struct node* oldNode, struct node* newNode, struct node* parentNode){
+void linkNodes(struct leafNode* oldNode, struct leafNode* newNode, struct parentNode* parentNode){
 
-//     if (parentNode == NULL)
-//     {
-//         printf("no parent Node\n");
-//     }else{
-//         parentNode->keys[1];
-//     }
-    
+    if (parentNode == NULL)
+    {
+        printf("no parent Node\n");
+    }else{
+        insertIntoParent(parentNode, newNode->keys[0]);
+    }
 
-// }
+}
 
-void insertionSort(int* arr, int arrSize, struct leafNode* leaf) {
+void insertionSort(int* arr, int arrSize, struct leafNode* leaf, struct parentNode* parent) {
     int key, j;
 
     if (arr != NULL && arrSize > 0) {
@@ -188,6 +209,23 @@ void insertionSort(int* arr, int arrSize, struct leafNode* leaf) {
             leaf->keys[j + 1] = key;
         }
     }
+    else if (parent != NULL && parent->numOfKeys > 0)
+    {
+        for (int i = 0; i < parent->numOfKeys; i++)
+        {
+            key = parent->keys[i];
+            j = i - 1;
+
+            while (j >= 0 && parent->keys[j] > key)
+            {
+                parent->keys[j + 1] = parent->keys[j];
+                j--;
+            }
+
+            parent->keys[j + 1] = key;
+        }
+    }
+    
 }
 
 void printNode(struct leafNode* node){
