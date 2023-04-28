@@ -5,7 +5,7 @@
 #include <math.h>
 
 void insertionSort(int* arr, int arrSize, struct leafNode* leaf, struct parentNode* parent);
-void printNode(struct leafNode* node);
+void printNode(int* arr, int size);
 bool checkNodeCapacity(struct leafNode* node);
 
 struct leafNode *createLeafNode(bool isMostLeft, bool isMostRight){
@@ -96,7 +96,7 @@ void insertIntoLeaf(struct leafNode* leaf, int key){
         
     }else{
         printf("free pointer: %d\n",leaf->freePointer);
-        printf("Inserting: %d to leaf node %p\n",key, &leaf);
+        printf("Inserting: %d to leaf node %p\n",key, leaf);
         leaf->keys[leaf->freePointer] = key;
 
         if (leaf->freePointer < MAX_LEAF_KEYS - 1)
@@ -105,7 +105,7 @@ void insertIntoLeaf(struct leafNode* leaf, int key){
         }
         leaf->numOfKeys++;
         insertionSort(NULL, 0, leaf, NULL);
-        printNode(leaf);
+        printNode(leaf->keys, leaf->numOfKeys);
         
     }
 }
@@ -117,7 +117,7 @@ void insertIntoParent(struct parentNode *parent, int key){
     }else{
 
         printf("free pointer: %d\n", parent->freePointer);
-        printf("Inserting to: %d to parent node %p\n", key, &parent);
+        printf("Inserting to: %d to parent node %p\n", key, parent);
         parent->keys[parent->freePointer] = key;
 
         if (parent->freePointer < MAX_PARENT_KEYS - 1)
@@ -176,6 +176,20 @@ void linkNodes(struct leafNode* oldNode, struct leafNode* newNode, struct parent
         printf("no parent Node\n");
     }else{
         insertIntoParent(parentNode, newNode->keys[0]);
+        parentNode->childPointers[parentNode->freeChildPointer] = oldNode;
+        parentNode->freeChildPointer++;
+        parentNode->childPointers[parentNode->freeChildPointer] = newNode;
+        parentNode->freeChildPointer++;
+
+        newNode->LRpointers[0] = oldNode;
+        newNode->parentPointer = parentNode;
+        printf("%p\n",newNode->parentPointer);
+        printf("%p\n",newNode->LRpointers[0]);
+
+        oldNode->LRpointers[1] = newNode;
+        oldNode->parentPointer = parentNode;
+        printf("%p\n",oldNode->parentPointer);
+         printf("%p\n",oldNode->LRpointers[1]);
     }
 
 }
@@ -228,9 +242,9 @@ void insertionSort(int* arr, int arrSize, struct leafNode* leaf, struct parentNo
     
 }
 
-void printNode(struct leafNode* node){
-    for (int i = 0; i < node->numOfKeys; i++)
-        printf("%d ", node->keys[i]);
+void printNode(int* arr, int size){
+    for (int i = 0; i < size; i++)
+        printf("%d ", arr[i]);
     printf("\n");
 }
 
