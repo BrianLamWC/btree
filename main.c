@@ -10,6 +10,9 @@ int main() {
     insertIntoLeaf(root, 1);
     insertIntoLeaf(root, 3);
     insertIntoLeaf(root, 3);
+    insertIntoLeaf(root, 3);
+    insertIntoLeaf(root, 3);
+    insertIntoLeaf(root, 3);
     return 0;
     
 }

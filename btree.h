@@ -32,6 +32,8 @@ struct leafNode* createLeafNode(bool isMostLeft, bool isMostRight);
 void split(struct leafNode* leaf, struct parentNode* parent,int key);
 void insertIntoLeaf(struct leafNode* leaf, int key);
 void insertIntoParent(struct parentNode* parent, int key);
+void removeFromLeaf(struct leafNode* leaf);
+void removeFromParent(struct parentNode* parent);
 void linkNodes(struct leafNode* oldNode, struct leafNode* newNode, struct parentNode* parentNode);
 
 #endif
