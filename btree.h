@@ -10,26 +10,23 @@
 
 struct node
 {
-    /* data */
+    int numOfKeys;
+    bool isMostLeft;
+    bool isMostRight;
+    int freePointer;
+    struct leafNode *LRpointers[MAX_LRPOINTERS];
 };
 
 
 struct leafNode{
-    int numOfKeys;
-    bool isMostLeft;
-    bool isMostRight;
+    struct node node;
     int keys[MAX_LEAF_KEYS];
-    int freePointer;
-    struct leafNode* LRpointers[MAX_LRPOINTERS];
     struct parentNode* parentPointer;
 };
 
 struct parentNode{
-    int numOfKeys;
-    bool isMostLeft;
-    bool isMostRight;
+    struct node node;
     int keys[MAX_PARENT_KEYS];
-    int freePointer;
     int freeChildPointer;
     struct leafNode* childPointers[MAX_POINTERS];
 };

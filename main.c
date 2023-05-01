@@ -5,16 +5,7 @@
 
 int main() {
 
-    // struct leafNode* root = createLeafNode(0,0);
-
-    // insertIntoLeaf(root, 1);
-    // insertIntoLeaf(root, 2);
-    // insertIntoLeaf(root, 3);
-    // insertIntoLeaf(root, 4);
-    // insertIntoLeaf(root, 5);
-    // insertIntoLeaf(root, 6);
-    // insertIntoLeaf(root, 7);
-    // return 0;
+    void* root = createLeafNode(0,0);
 
     char input[100];
     while (1)
@@ -45,7 +36,8 @@ int main() {
             int key;
             printf("Enter key to insert into the tree: ");
             scanf("%d", &key);
-            
+            getchar(); // consume the newline character left in the input buffer by scanf
+            insertIntoLeaf(root, key);
         }
         else if (strcmp(input, "delete") == 0)
         {
