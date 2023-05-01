@@ -62,7 +62,7 @@ void insertIntoLeaf(struct leafNode* leaf, int key){
             {
                 insertIntoLeaf(leaf->LRpointers[1], key);
             }else{
-                split() //till here 4/29
+                split(leaf,NULL,key);
             }
             
         }else if (leaf->isMostRight) // is leaf most right?
@@ -157,7 +157,7 @@ void split(struct leafNode* leaf, struct parentNode* parent,int key){
 
         insertionSort(tempKeys, MAX_LEAF_KEYS + 1, NULL, NULL);
 
-        if (leaf->parentPointer == NULL) // no parents
+        if (leaf->parentPointer == NULL) // no parent
         {
             struct parentNode *parent = createParentNode(0, 0);
             struct leafNode *newLeaf = createLeafNode(0, 1); // new leaf on the right
@@ -176,6 +176,22 @@ void split(struct leafNode* leaf, struct parentNode* parent,int key){
 
 
             linkNodes(leaf, newLeaf, parent);
+        }else{ // has parent
+            if (leaf->parentPointer->numOfKeys == MAX_PARENT_KEYS)
+            {
+
+                printf("split parents\n");
+
+            }else{
+                
+                if (leaf->isMostLeft)
+                {
+                    struct leafNode *newLeaf = createLeafNode(0, 0);
+                    
+                }
+                
+            }
+            
         }
     }
 
