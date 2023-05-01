@@ -8,6 +8,12 @@
 #define MAX_LRPOINTERS 2
 #define MAX_POINTERS (MAX_PARENT_KEYS + 1)
 
+struct node
+{
+    /* data */
+};
+
+
 struct leafNode{
     int numOfKeys;
     bool isMostLeft;
