@@ -10,7 +10,6 @@
 
 struct node
 {
-    int numOfKeys;
     bool isMostLeft;
     bool isMostRight;
     int freePointer;
@@ -33,6 +32,7 @@ struct parentNode{
 
 struct leafNode* createLeafNode(bool isMostLeft, bool isMostRight);
 void split(struct leafNode* leaf, struct parentNode* parent,int key);
+void insertIntoTree(void* root, bool isLeaf);
 void insertIntoLeaf(struct leafNode* leaf, int key);
 void insertIntoParent(struct parentNode* parent, int key);
 void removeFromLeaf(struct leafNode* leaf);

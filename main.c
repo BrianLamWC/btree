@@ -29,7 +29,7 @@ int main() {
         }
         else if (strcmp(input, "tree") == 0)
         {
-            printf("Printing tree\n");
+            insertIntoTree(root, true);
         }
         else if (strcmp(input, "insert") == 0)
         {
@@ -37,6 +37,11 @@ int main() {
             printf("Enter key to insert into the tree: ");
             scanf("%d", &key);
             getchar(); // consume the newline character left in the input buffer by scanf
+
+            if
+
+
+
             insertIntoLeaf(root, key);
         }
         else if (strcmp(input, "delete") == 0)
