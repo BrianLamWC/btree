@@ -28,16 +28,18 @@ struct parentNode{
     int keys[MAX_PARENT_KEYS];
     int freeChildPointer;
     struct leafNode* childPointers[MAX_POINTERS];
+    struct parentNode* parentPointer;
 };
 
 struct leafNode* createLeafNode(bool isMostLeft, bool isMostRight);
 void split(struct leafNode* leaf, struct parentNode* parent,int key);
-void insertIntoTree(void* root, bool isLeaf);
+void insertIntoTree(void* root, bool isLeaf, int key);
 void insertIntoLeaf(struct leafNode* leaf, int key);
 void insertIntoParent(struct parentNode* parent, int key);
 void removeFromLeaf(struct leafNode* leaf);
 void removeFromParent(struct parentNode* parent);
 void linkNodes(struct leafNode* oldNode, struct leafNode* newNode, struct parentNode* parentNode);
+void* getRoot(void* node, bool isLeaf);
 
 #endif
 
