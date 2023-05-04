@@ -10,14 +10,12 @@ bool checkNodeCapacity(struct leafNode* node);
 struct leafNode* voidToLeaf(void* leaf);
 struct leafParent *voidToParent(void *leaf);
 
-void* getRoot(void* node, bool isLeaf){
+struct node* getRoot(struct node* node){
 
     void* parent = NULL;
 
-    if (isLeaf)
+    if (node->isLeaf)
     {
-        
-
         struct leafNode* root = (struct leafNode*)node;
 
         if (root->parentPointer != NULL)
@@ -27,19 +25,15 @@ void* getRoot(void* node, bool isLeaf){
             parent = root;
         }
         
-
     }else{
         struct parentNode* root = (struct parentNode*)node;
 
         if (root->parentPointer != NULL)
         {
-            printf("here1\n");
             parent = root->parentPointer;
         }else{
-            printf("here2\n");
             parent = root;
         }
-
     }
 
     printf("Root Node is: %p\n", parent);
@@ -52,13 +46,14 @@ struct leafNode *createLeafNode(bool isMostLeft, bool isMostRight){
     newLeaf->node.isMostLeft = isMostLeft;
     newLeaf->node.isMostRight = isMostRight;
     newLeaf->node.freePointer = 0;
+    newLeaf->node.isLeaf = true;
 
     for (int i = 0; i < MAX_LEAF_KEYS; i++) {
         newLeaf->keys[i] = 0;
     }
 
     for (int i = 0; i < MAX_LRPOINTERS; i++) {
-        newLeaf->node.LRpointers[i] = NULL;
+        newLeaf->LRpointers[i] = NULL;
     }
 
     newLeaf->parentPointer = NULL;
@@ -73,6 +68,8 @@ struct parentNode* createParentNode(bool isMostLeft, bool isMostRight)
     newParent->node.isMostRight = isMostRight;
     newParent->node.freePointer = 0;
     newParent->freeChildPointer = 0;
+    newParent->node.isLeaf = false;
+
 
     for (int i = 0; i < MAX_PARENT_KEYS; i++)
     {
@@ -87,26 +84,41 @@ struct parentNode* createParentNode(bool isMostLeft, bool isMostRight)
     return newParent;
 }
 
-void insertIntoTree(void* rootNode, bool isLeaf, int key){
+void insertIntoTree(struct node* node, int key){
 
-    if (isLeaf)
+    if (node->isLeaf)
     {
-        struct leafNode* root = (struct leafNode *)rootNode;
+        struct leafNode* root = (struct leafNode *)node;
         insertIntoLeaf(root, key);
     }else{
-        struct parentNode* root = (struct parentNode *)rootNode;
+        struct parentNode* root = (struct parentNode *)node;
 
-        for ( int i = 0; i < root->freeChildPointer; i++)
+        int i;
+
+        for ( i = 0; i < root->node.freePointer; i++)
         {
             if (key <= root->keys[i])
             {
-                insertIntoLeaf(root->childPointers[i],key);
+                break;
             }
-            
+        }
+
+        if (i == MAX_LEAF_KEYS - 1 && key >= root->keys[MAX_LEAF_KEYS - 1])
+        {
+            i++;
         }
         
+        struct node* tmpchild = (struct node*)root->childPointers[i];
+
+        if(!tmpchild->isLeaf) 
+        {
+            insertIntoTree(tmpchild,key);
+            return;
+        }else{
+            insertIntoLeaf(root->childPointers[i],key);
+        }
+
     }
-    
 
 }
 
@@ -117,9 +129,9 @@ void insertIntoLeaf(struct leafNode* leaf, int key){
         if (leaf->node.isMostLeft) // is leaf most left?
         {
             printf("most left\n");
-            if (checkNodeCapacity(leaf->node.LRpointers[1]))
+            if (checkNodeCapacity(leaf->LRpointers[1]))
             {
-                insertIntoLeaf(leaf->node.LRpointers[1], key);
+                insertIntoLeaf(leaf->LRpointers[1], key);
             }else{
                 split(leaf,NULL,key);
             }
@@ -128,27 +140,27 @@ void insertIntoLeaf(struct leafNode* leaf, int key){
         else if (leaf->node.isMostRight) // is leaf most right?
         {
             printf("most right\n");
-            if (checkNodeCapacity(leaf->node.LRpointers[0]))
+            if (checkNodeCapacity(leaf->LRpointers[0]))
             {
-                insertIntoLeaf(leaf->node.LRpointers[0], key);
+                insertIntoLeaf(leaf->LRpointers[0], key);
             }
 
         }else{ // only one leaf present or it is between other leaves
 
-            if (leaf->node.LRpointers[0] == NULL && leaf->node.LRpointers[1] == NULL) // only leaf present
+            if (leaf->LRpointers[0] == NULL && leaf->LRpointers[1] == NULL) // only leaf present
             {
                 split(leaf, NULL,key);
                 printf("Leaf node %p after spliting\n",leaf);
-                printNode(leaf->keys, MAX_LEAF_KEYS);
+                printNode(leaf->keys, leaf->node.freePointer);
             }else
             {
-                if (checkNodeCapacity(leaf->node.LRpointers[0])) // left has space
+                if (checkNodeCapacity(leaf->LRpointers[0])) // left has space
                 {
-                    insertIntoLeaf(leaf->node.LRpointers[0], key);
+                    insertIntoLeaf(leaf->LRpointers[0], key);
                 }
-                else if (checkNodeCapacity(leaf->node.LRpointers[1]))
+                else if (checkNodeCapacity(leaf->LRpointers[1]))
                 {
-                    insertIntoLeaf(leaf->node.LRpointers[1], key);
+                    insertIntoLeaf(leaf->LRpointers[1], key);
                 }else
                 {
                     printf("5\n");
@@ -264,7 +276,7 @@ void split(struct leafNode* leaf, struct parentNode* parent,int key){
 
 void linkNodes(struct leafNode* oldNode, struct leafNode* newNode, struct parentNode* parentNode){
 
-    if (oldNode->node.LRpointers[0] == NULL && oldNode->node.LRpointers[1] == NULL) // initial tree
+    if (oldNode->LRpointers[0] == NULL && oldNode->LRpointers[1] == NULL) // initial tree
     {      
         oldNode->parentPointer = parentNode;
     }
@@ -274,9 +286,9 @@ void linkNodes(struct leafNode* oldNode, struct leafNode* newNode, struct parent
     parentNode->freeChildPointer++;
     parentNode->childPointers[parentNode->freeChildPointer] = newNode;
     parentNode->freeChildPointer++;
-    newNode->node.LRpointers[0] = oldNode;
+    newNode->LRpointers[0] = oldNode;
     newNode->parentPointer = parentNode;
-    oldNode->node.LRpointers[1] = newNode;
+    oldNode->LRpointers[1] = newNode;
 
 }
 

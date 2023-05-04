@@ -1,0 +1,48 @@
+./test
+Root Node is: 0x56203598c2a0
+Enter a command: insert
+Enter key to insert into the tree: 1
+free pointer: 0
+Inserting: 1 to leaf node 0x56203598c2a0
+1
+Root Node is: 0x56203598c2a0
+Enter a command: insert
+Enter key to insert into the tree: 1
+free pointer: 1
+Inserting: 1 to leaf node 0x56203598c2a0
+1 1
+Root Node is: 0x56203598c2a0
+Enter a command: insert
+Enter key to insert into the tree: 1
+free pointer: 2
+Inserting: 1 to leaf node 0x56203598c2a0
+1 1 1
+Root Node is: 0x56203598c2a0
+Enter a command: insert
+Enter key to insert into the tree: 1
+free pointer: 0
+Inserting: 1 to leaf node 0x56203598cb60
+1
+free pointer: 1
+Inserting: 1 to leaf node 0x56203598cb60
+1 1
+free pointer: 0
+Inserting to: 1 to parent node 0x56203598cb00
+1
+Leaf node 0x56203598c2a0 after spliting
+1 1
+Root Node is: 0x56203598cb00
+Enter a command: insert
+Enter key to insert into the tree: 2
+free pointer: 2
+Inserting: 2 to leaf node 0x56203598cb60
+1 1 2
+Root Node is: 0x56203598cb00
+Enter a command: insert
+Enter key to insert into the tree: 3
+free pointer: 2
+Inserting: 3 to leaf node 0x56203598c2a0 PROBLEM HERE
+1 1 3   
+Root Node is: 0x56203598cb00
+Enter a command: quit
+Exiting program...

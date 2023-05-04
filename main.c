@@ -5,28 +5,14 @@
 
 int main() {
 
-    void* root = createLeafNode(0,0);
+    struct node* root = (struct node*)createLeafNode(0,0);
     int intialLeafNumOfKeys = 0;
 
     char input[100];
     while (1)
     {
 
-        
-
-        if (intialLeafNumOfKeys < MAX_LEAF_KEYS + 1)
-        {
-            root = getRoot(root,true);
-
-        }else if(intialLeafNumOfKeys == MAX_LEAF_KEYS + 1)
-        {
-            root = getRoot(root,true);
-            intialLeafNumOfKeys++;
-        }
-        else
-        {
-            root = getRoot(root, false);
-        }
+        root = getRoot(root);
 
         printf("Enter a command: ");
         fgets(input, 100, stdin);
@@ -54,18 +40,9 @@ int main() {
             int key;
             printf("Enter key to insert into the tree: ");
             scanf("%d", &key);
-            getchar(); // consume newline character left in the input buffer by scanf
+            getchar(); // consume newline character left in the input buffer by scanf     
 
-            
-
-            if (intialLeafNumOfKeys <= MAX_LEAF_KEYS)
-            {   
-                insertIntoTree(root, true, key);
-                intialLeafNumOfKeys++;
-            }else{
-                insertIntoTree(root, false, key);
-                printf("%d %p\n",checkNodeCapacity(root), root);
-            }
+            insertIntoTree(root, key);
 
         }
         else if (strcmp(input, "delete") == 0)
@@ -80,10 +57,6 @@ int main() {
         {
             printf("Invalid command. Type 'help' for a list of available commands.\n");
         }
-
-
-
-
 
     }
     return 0;
