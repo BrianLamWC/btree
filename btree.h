@@ -16,7 +16,6 @@ struct node
     bool isLeaf;
 };
 
-
 struct leafNode{
     struct node node;
     int keys[MAX_LEAF_KEYS];
@@ -33,16 +32,17 @@ struct parentNode{
     struct parentNode *LRpointers[MAX_LRPOINTERS];
 };
 
-struct leafNode* createLeafNode(bool isMostLeft, bool isMostRight);
+struct leafNode* createLeafNode();
 void split(struct leafNode* leaf, struct parentNode* parent,int key);
 void insertIntoTree(struct node* root, int key);
 void insertIntoLeaf(struct leafNode* leaf, int key);
 void insertIntoParent(struct parentNode* parent, int key);
-void removeFromLeaf(struct leafNode* leaf);
+void removeFromLeaf(struct leafNode* leaf, bool removeFromBack);
 void removeFromParent(struct parentNode* parent);
 void linkNodes(struct leafNode* oldNode, struct leafNode* newNode, struct parentNode* parentNode);
 struct node* getRoot(struct node* node);
 bool checkNodeCapacity(struct leafNode* leaf);
+void setParentKeys(struct parentNode* parent);
 
 #endif
 
