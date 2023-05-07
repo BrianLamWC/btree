@@ -43,6 +43,7 @@ void linkNodes(struct leafNode* oldNode, struct leafNode* newNode, struct parent
 struct node* getRoot(struct node* node);
 bool checkNodeCapacity(struct leafNode* leaf);
 void setParentKeys(struct parentNode* parent);
+void printChild(struct node* node);
 
 #endif
 

@@ -33,7 +33,7 @@ int main() {
         }
         else if (strcmp(input, "tree") == 0)
         {
-            //insertIntoTree(initialLeaf, true);
+            printChild(root);
         }
         else if (strcmp(input, "insert") == 0)
         {

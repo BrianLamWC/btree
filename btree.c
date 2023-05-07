@@ -281,15 +281,12 @@ void split(struct leafNode* leaf, struct parentNode* parent,int key){
                 
                 if (leaf->node.isMostLeft)
                 {
-                    printf("here1\n");
                     struct leafNode *newLeaf = createLeafNode(0, 0);
                     linkNodes(leaf, newLeaf, leaf->parentPointer);
-                    printf("here2\n");
                     for (int i = 0; i < newNodeNumOfKeys; i++)
                     {
                         insertIntoLeaf(newLeaf, tempKeys[(MAX_LEAF_KEYS)-i]);
                     }
-                    printf("here4\n");
                     for (int i = 0; i < newNodeNumOfKeys - 1; i++)
                     {
                         removeFromLeaf(leaf,1);
@@ -442,4 +439,13 @@ void setParentKeys(struct parentNode* parent){
 
     printf("Setting keys of parent node %p\n", parent);
     printNode(parent->keys,MAX_PARENT_KEYS);
+}
+
+void printChild(struct node* node){
+
+    struct parentNode* parent = (struct parentNode *)node;
+
+    for (int i = 0; i < parent->freeChildPointer; i++)
+        printf("%p ", parent->childPointers[i]);
+    printf("\n");
 }
