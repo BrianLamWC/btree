@@ -148,6 +148,7 @@ void insertIntoLeaf(struct leafNode* leaf, int key){
             }else
             {
                 split(leaf,NULL,key);
+                insertIntoLeaf(leaf,key);
                 printf("Spliting leaf node %p\n",leaf);
                 printNode(leaf->keys, leaf->node.freePointer);
             }
@@ -268,8 +269,6 @@ void split(struct leafNode* leaf, struct parentNode* parent,int key){
             {
                 removeFromLeaf(leaf,1);
             }
-
-
 
         }else{ // has parent
             if (leaf->parentPointer->node.freePointer >= MAX_PARENT_KEYS)
