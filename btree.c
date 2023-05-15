@@ -107,7 +107,7 @@ void insertIntoTree(struct node* node, int key){
             }
         }
 
-        printf("i is %d\n",i);
+        // printf("i is %d\n",i);
 
         // if (i == root->node.freePointer && key >= root->keys[MAX_LEAF_KEYS - 1])
         // {
@@ -138,13 +138,19 @@ void insertIntoLeaf(struct leafNode* leaf, int key){
         printf("LEAF %p is FULL\n", leaf);
         if (leaf->node.isMostLeft) // is leaf most left?
         {
-            printf("most left\n");
-            if (checkNodeCapacity(leaf->LRpointers[1]) && key > leaf->LRpointers[1]->keys[0])
+            printf("most left\n"); 
+            if (checkNodeCapacity(leaf->LRpointers[1]) && key >= leaf->LRpointers[1]->keys[0])
             {
                 printf("right has space\n");
-                insertIntoLeaf(leaf->LRpointers[1], leaf->keys[MAX_LEAF_KEYS - 1]);
-                removeFromLeaf(leaf,1);
-                insertIntoLeaf(leaf,key);
+                if (leaf->keys[MAX_LEAF_KEYS - 1] <=  key)
+                {
+                    insertIntoLeaf(leaf->LRpointers[1], key);
+                }else{
+                    insertIntoLeaf(leaf->LRpointers[1], leaf->keys[MAX_LEAF_KEYS - 1]);
+                    removeFromLeaf(leaf, 1);
+                    insertIntoLeaf(leaf, key);
+                }
+
             }else
             {
                 split(leaf,NULL,key);
@@ -156,7 +162,7 @@ void insertIntoLeaf(struct leafNode* leaf, int key){
         else if (leaf->node.isMostRight) // is leaf most right?
         {
             printf("most right\n");
-            if (checkNodeCapacity(leaf->LRpointers[0]))
+            if (checkNodeCapacity(leaf->LRpointers[0])) //I dont know if the left node has how many values, need to find the last value
             {
                 printf("left has space\n");
                 insertIntoLeaf(leaf->LRpointers[0], leaf->keys[0]); // give lowest value
@@ -295,9 +301,9 @@ void split(struct leafNode* leaf, struct parentNode* parent,int key){
                 printf("split parents\n");
 
             }else{
-                printf("HERERERERERERERERERERE\n");
-                printf("newnodenumkeys: %d\n", newNodeNumOfKeys);
-                printNode(tempKeys, MAX_LEAF_KEYS + 1);
+                // printf("HERERERERERERERERERERE\n");
+                // printf("newnodenumkeys: %d\n", newNodeNumOfKeys);
+                //printNode(tempKeys, MAX_LEAF_KEYS + 1);
                 
                 if (leaf->node.isMostLeft)
                 {
