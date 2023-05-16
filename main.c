@@ -53,6 +53,15 @@ int main() {
         {
             printf("searching key\n");
         }
+        else if (strcmp(input, "test") == 0)
+        {
+            for (int i = 1; i < 14; i++)
+            {
+                root = getRoot(root);
+                insertIntoTree(root,i);
+            }
+            
+        }
         else
         {
             printf("Invalid command. Type 'help' for a list of available commands.\n");

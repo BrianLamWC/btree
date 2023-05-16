@@ -20,9 +20,9 @@ struct node* getRoot(struct node* node){
     {
         struct leafNode* root = (struct leafNode*)node;
 
-        if (root->parentPointer != NULL)
+        if (root->node.parentPointer != NULL)
         {
-            parent = root->parentPointer;
+            parent = root->node.parentPointer;
         }else{
             parent = root;
         }
@@ -30,9 +30,9 @@ struct node* getRoot(struct node* node){
     }else{
         struct parentNode* root = (struct parentNode*)node;
 
-        if (root->parentPointer != NULL)
+        if (root->node.parentPointer != NULL)
         {
-            parent = root->parentPointer;
+            parent = root->node.parentPointer;
         }else{
             parent = root;
         }
@@ -58,7 +58,7 @@ struct leafNode *createLeafNode(){
         newLeaf->LRpointers[i] = NULL;
     }
 
-    newLeaf->parentPointer = NULL;
+    newLeaf->node.parentPointer = NULL;
 
     return newLeaf;
 }
@@ -94,10 +94,7 @@ void insertIntoTree(struct node* node, int key){
         insertIntoLeaf(root, key);
     }else{
         struct parentNode* root = (struct parentNode *)node;
-
         int i;
-
-        printf("keys in root : %d\n", root->node.freePointer);
 
         for ( i = 0; i < root->node.freePointer; i++)
         {
@@ -106,24 +103,14 @@ void insertIntoTree(struct node* node, int key){
                 break;
             }
         }
-
-        // printf("i is %d\n",i);
-
-        // if (i == root->node.freePointer && key >= root->keys[MAX_LEAF_KEYS - 1])
-        // {
-        //     i++;
-        // }
-        
-        //printf("i is %d\n",i);
-
         struct node* tmpchild = (struct node*)root->childPointers[i];
-
+        printf("i : %d\n",i);
         if(!tmpchild->isLeaf) 
         {
             insertIntoTree(tmpchild,key);
             return;
         }else{
-            insertIntoLeaf(root->childPointers[i],key);
+            insertIntoLeaf((struct leafNode* )root->childPointers[i],key);
         }
 
     }
@@ -139,7 +126,7 @@ void insertIntoLeaf(struct leafNode* leaf, int key){
         if (leaf->node.isMostLeft) // is leaf most left?
         {
             printf("most left\n"); 
-            if (checkNodeCapacity(leaf->LRpointers[1]) && key >= leaf->LRpointers[1]->keys[0])
+            if (checkNodeCapacity(leaf->LRpointers[1]))
             {
                 printf("right has space\n");
                 if (leaf->keys[MAX_LEAF_KEYS - 1] <=  key)
@@ -153,7 +140,7 @@ void insertIntoLeaf(struct leafNode* leaf, int key){
 
             }else
             {
-                split(leaf,NULL,key);
+                splitLeaf(leaf, key);
                 printf("Spliting leaf node %p\n",leaf);
                 printNode(leaf->keys, leaf->node.freePointer);
             }
@@ -162,19 +149,25 @@ void insertIntoLeaf(struct leafNode* leaf, int key){
         else if (leaf->node.isMostRight) // is leaf most right?
         {
             printf("most right\n");
-            if (checkNodeCapacity(leaf->LRpointers[0])) //I dont know if the left node has how many values, need to find the last value
+            if (checkNodeCapacity(leaf->LRpointers[0]))
             {
                 printf("left has space\n");
                 insertIntoLeaf(leaf->LRpointers[0], leaf->keys[0]); // give lowest value
                 removeFromLeaf(leaf,0);
                 insertIntoLeaf(leaf,key);
+            }else
+            {
+                splitLeaf(leaf, key);
+                printf("Spliting leaf node %p\n",leaf);
+                printNode(leaf->keys, leaf->node.freePointer);
             }
 
         }else{ // only one leaf present or it is between other leaves
             if (leaf->LRpointers[0] == NULL && leaf->LRpointers[1] == NULL) // only leaf present
             {
-                split(leaf, NULL,key);
+                splitLeaf(leaf, key);
                 printf("Spliting leaf node %p\n",leaf);
+                //printf("leaf %p free pointer: %d\n",leaf,leaf->node.freePointer);
                 printNode(leaf->keys, leaf->node.freePointer);
             }else
             {
@@ -189,10 +182,19 @@ void insertIntoLeaf(struct leafNode* leaf, int key){
                 else if (checkNodeCapacity(leaf->LRpointers[1]))
                 {
                     printf("right has space\n");
-                    insertIntoLeaf(leaf->LRpointers[1], leaf->keys[MAX_LEAF_KEYS - 1]);
-                    removeFromLeaf(leaf,1);
-                    insertIntoLeaf(leaf,key);
-                }
+                    if (leaf->keys[MAX_LEAF_KEYS - 1] <=  key)
+                    {
+                        insertIntoLeaf(leaf->LRpointers[1], key);
+                    }else{
+                        insertIntoLeaf(leaf->LRpointers[1], leaf->keys[MAX_LEAF_KEYS - 1]);
+                        removeFromLeaf(leaf, 1);
+                        insertIntoLeaf(leaf, key);
+                    }
+                }else{
+                    splitLeaf(leaf, key);
+                    printf("Spliting leaf node %p\n",leaf);
+                    printNode(leaf->keys, leaf->node.freePointer);
+                }   
             
             }
             
@@ -205,12 +207,13 @@ void insertIntoLeaf(struct leafNode* leaf, int key){
         leaf->node.freePointer++;
         insertionSort(NULL, 0, leaf);
         printNode(leaf->keys, leaf->node.freePointer);
-
     }
 
-    if ( (leaf->parentPointer != NULL) && (leaf != leaf->parentPointer->childPointers[0]) )
+    struct parentNode* tmpParent = (struct parentNode* )leaf->node.parentPointer;
+
+    if ( (tmpParent != NULL) && (leaf != (struct leafNode*)tmpParent->childPointers[0]))
     {
-        setParentKeys(leaf->parentPointer);
+        setParentKeys((struct parentNode*)leaf->node.parentPointer);
     }
     
 }
@@ -248,37 +251,51 @@ void removeFromParent(struct parentNode* parent){
     parent->node.freePointer--;
 }
 
-void split(struct leafNode* leaf, struct parentNode* parent,int key){
-    
-    if (parent == NULL)
-    {
-        int tempKeys[MAX_LEAF_KEYS + 1];
-        int newNodeNumOfKeys = ceil((float)MAX_LEAF_KEYS / 2);
-        int remainder;
-
-        if (newNodeNumOfKeys % 2 == 0)
-        {
-            remainder = newNodeNumOfKeys;
-        }else
-        {
-            remainder = newNodeNumOfKeys - 1;
-        }
+void splitLeaf(struct leafNode* leaf, int key){
         
-        for (int i = 0; i < MAX_LEAF_KEYS; i++)
-        { // copy keys into temp list
-            tempKeys[i] = leaf->keys[i];
+    int tempKeys[MAX_LEAF_KEYS + 1];
+    int newNodeNumOfKeys = ceil((float)(MAX_LEAF_KEYS + 1)/ 2);
+    int remainder;
+
+    if (newNodeNumOfKeys % 2 == 0)
+    {
+        remainder = newNodeNumOfKeys;
+    }else{
+        remainder = newNodeNumOfKeys - 1;
+    }
+    
+    for (int i = 0; i < MAX_LEAF_KEYS; i++)
+    { // copy keys into temp list
+        tempKeys[i] = leaf->keys[i];
+    }
+
+    tempKeys[MAX_LEAF_KEYS] = key; // add last key
+
+    insertionSort(tempKeys, MAX_LEAF_KEYS + 1, NULL);
+
+    if (leaf->node.parentPointer == NULL) // no parent
+    {
+        struct parentNode *parent = createParentNode();
+        struct leafNode *newLeaf = createLeafNode(); 
+        linkNodes2Parents(leaf, newLeaf, parent);
+        for (int i = 0; i < newNodeNumOfKeys; i++)
+        {
+            insertIntoLeaf(newLeaf, tempKeys[(MAX_LEAF_KEYS)-i]);
+        }
+        for (int i = 0; i < remainder-1; i++)
+        {
+            removeFromLeaf(leaf,1);
+        }
+        for (int i = 0; i < remainder; i++)
+        {
+            leaf->keys[i] = tempKeys[i];
         }
 
-        tempKeys[MAX_LEAF_KEYS] = key; // add last key
-
-        insertionSort(tempKeys, MAX_LEAF_KEYS + 1, NULL);
-
-        if (leaf->parentPointer == NULL) // no parent
-        {
-            struct parentNode *parent = createParentNode();
-            struct leafNode *newLeaf = createLeafNode(); 
-            linkNodes(leaf, newLeaf, parent);
-            printf("newnodenumkeys: %d\n", newNodeNumOfKeys);
+    }else{ // has parent
+        struct parentNode* tmpParent = (struct parentNode*)leaf->node.parentPointer;
+        if (tmpParent->freeChildPointer >= MAX_POINTERS)
+        { 
+            struct leafNode *newLeaf = createLeafNode(0, 0);
             for (int i = 0; i < newNodeNumOfKeys; i++)
             {
                 insertIntoLeaf(newLeaf, tempKeys[(MAX_LEAF_KEYS)-i]);
@@ -287,106 +304,162 @@ void split(struct leafNode* leaf, struct parentNode* parent,int key){
             for (int i = 0; i < newNodeNumOfKeys - 1; i++)
             {
                 removeFromLeaf(leaf,1);
-            }
-
+            }       
+            
             for (int i = 0; i < remainder; i++)
             {
                 leaf->keys[i] = tempKeys[i];
-            }
-
-        }else{ // has parent
-            if (leaf->parentPointer->node.freePointer >= MAX_PARENT_KEYS)
+            } 
+            splitParents((struct node*)leaf, (struct node*)newLeaf);
+        }else{
+            struct leafNode *newLeaf = createLeafNode(0, 0);
+            linkNodes2Parents(leaf, newLeaf, (struct parentNode*)leaf->node.parentPointer);
+            for (int i = 0; i < newNodeNumOfKeys; i++)
             {
-
-                printf("split parents\n");
-
-            }else{
-                // printf("HERERERERERERERERERERE\n");
-                // printf("newnodenumkeys: %d\n", newNodeNumOfKeys);
-                //printNode(tempKeys, MAX_LEAF_KEYS + 1);
-                
-                if (leaf->node.isMostLeft)
-                {
-                    struct leafNode *newLeaf = createLeafNode(0, 0);
-                    linkNodes(leaf, newLeaf, leaf->parentPointer);
-
-                    for (int i = 0; i < newNodeNumOfKeys; i++)
-                    {
-                        insertIntoLeaf(newLeaf, tempKeys[(MAX_LEAF_KEYS)-i]);
-                    }
-
-                    for (int i = 0; i < newNodeNumOfKeys - 1; i++)
-                    {
-                        removeFromLeaf(leaf,1);
-                    }       
-                    
-                    for (int i = 0; i < remainder; i++)
-                    {
-                        leaf->keys[i] = tempKeys[i];
-                    }             
-
-                }
-                
+                insertIntoLeaf(newLeaf, tempKeys[(MAX_LEAF_KEYS)-i]);
             }
+
+            for (int i = 0; i < newNodeNumOfKeys - 1; i++)
+            {
+                removeFromLeaf(leaf,1);
+            }       
             
+            for (int i = 0; i < remainder; i++)
+            {
+                leaf->keys[i] = tempKeys[i];
+            }             
         }
+        
     }
+    
 
 }
 
-void linkNodes(struct leafNode* oldNode, struct leafNode* newNode, struct parentNode* parentNode){
+void splitParents(struct node* oldNode, struct node* newNode){
+    struct parentNode* oldParent = (struct parentNode*)oldNode->parentPointer;
+    struct parentNode* newParent = createParentNode();
 
+    int newParentNumOfNode = ceil((float)(MAX_POINTERS + 1)/ 2);
+    int remainder;
+    struct node* tmpChilds[MAX_POINTERS+1];
 
+    //printf("newParentNumOfNode: %d\n", newParentNumOfNode);
+    
+
+    if (newParentNumOfNode % 2 == 0)
+    {
+        remainder = newParentNumOfNode;
+    }else{
+        remainder = newParentNumOfNode - 1;
+    }
+    
+    for (int i = 0; i < MAX_POINTERS ; i++)
+    {
+        tmpChilds[i] = oldParent->childPointers[i];
+    }
+    
+    //printf("remainder: %d\n", remainder);
+
+    tmpChilds[MAX_POINTERS] = newNode;
+
+    if (oldParent->node.parentPointer == NULL)//initial
+    {
+        struct parentNode* newRoot = createParentNode();
+        linkParents(oldParent, newParent, newRoot);
+
+        for (int i = 0; i < newParentNumOfNode; i++)
+        {
+            newParent->childPointers[i] = tmpChilds[i];
+            newParent->freeChildPointer++;
+        }
+        
+        for (int i = 0; i < remainder; i++)
+        {
+            printf("getting rid of %p\n ",oldParent->childPointers[oldParent->freeChildPointer - i]);
+            oldParent->childPointers[(oldParent->freeChildPointer - 1 )- i] = NULL;
+            oldParent->freeChildPointer--;
+        }    
+
+    }else{
+        struct parentNode* tmpParent = (struct parentNode*)oldNode->parentPointer;
+        if (tmpParent->freeChildPointer >= MAX_POINTERS)
+        {
+            //splitParents();
+        }else{
+            linkParents(oldParent,newParent,(struct parentNode*)oldParent->node.parentPointer);
+        }
+        
+    }
+    
+}
+
+void linkParents(struct parentNode* oldParent, struct parentNode* newParent, struct parentNode* newRoot){
+    if (oldParent->LRpointers[0] == NULL && oldParent->LRpointers[1] == NULL) // initial tree
+    {   
+        newParent->LRpointers[0] = oldParent;
+        newParent->node.parentPointer = (struct node*)newRoot;
+        newParent->node.isMostRight = true;
+        oldParent->node.parentPointer = (struct node*)newRoot;
+        oldParent->node.isMostLeft = true;
+        oldParent->LRpointers[1] = newParent;
+        newRoot->childPointers[newRoot->freeChildPointer] = (struct node*)oldParent;
+        newRoot->freeChildPointer++;
+        newRoot->childPointers[newRoot->freeChildPointer] = (struct node*)newParent;
+        newRoot->freeChildPointer++;
+    }
+}
+
+void linkNodes2Parents(struct leafNode* oldNode, struct leafNode* newNode, struct parentNode* parentNode){
 
     if (oldNode->LRpointers[0] == NULL && oldNode->LRpointers[1] == NULL) // initial tree
     {   
         newNode->LRpointers[0] = oldNode;
-        newNode->parentPointer = parentNode;
-        oldNode->parentPointer = parentNode;
+        newNode->node.parentPointer = (struct node*)parentNode;
+        oldNode->node.parentPointer = (struct node*)parentNode;
         oldNode->node.isMostLeft = true;
         newNode->node.isMostRight = true;
-        parentNode->childPointers[parentNode->freeChildPointer] = oldNode;
+        parentNode->childPointers[parentNode->freeChildPointer] = (struct node*)oldNode;
         parentNode->freeChildPointer++;
-        parentNode->childPointers[parentNode->freeChildPointer] = newNode;
+        parentNode->childPointers[parentNode->freeChildPointer] = (struct node*)newNode;
         parentNode->freeChildPointer++;
         oldNode->LRpointers[1] = newNode;
-    }else if (oldNode->node.isMostLeft && oldNode->LRpointers[1] != NULL) //is most left
+    }else
     {
-        struct leafNode* prevNode = oldNode->LRpointers[1];
-        prevNode->LRpointers[0] = newNode;
-        newNode->LRpointers[1] = prevNode;
-        newNode->LRpointers[0] = oldNode;
-        newNode->parentPointer = parentNode;
-        oldNode->LRpointers[1] = newNode;
-
-        int i;
         
-        //printf("fcp : %d\n",parentNode->freeChildPointer);
+        if (oldNode->node.isMostLeft && oldNode->LRpointers[1] != NULL)
+        {
+            struct leafNode* prevNode = oldNode->LRpointers[1];
+            prevNode->LRpointers[0] = newNode;
+            newNode->LRpointers[1] = prevNode;
+            newNode->LRpointers[0] = oldNode;
+            newNode->node.parentPointer = (struct node*)parentNode;
+            oldNode->LRpointers[1] = newNode;
 
+        }else if (oldNode->node.isMostRight && oldNode->LRpointers[0] != NULL)
+        {
+            oldNode->LRpointers[1] = newNode;
+            oldNode->node.isMostRight = false;
+            newNode->node.isMostRight = true;
+            newNode->node.parentPointer = (struct node*)parentNode;
+            newNode->LRpointers[0] = oldNode;
+        }else{
+            struct leafNode* prevNode = oldNode->LRpointers[1];
+            prevNode->LRpointers[0] = newNode;
+            newNode->LRpointers[1] = prevNode;
+            newNode->LRpointers[0] = oldNode;
+            oldNode->LRpointers[1] = newNode;
+            newNode->node.parentPointer = (struct node*)parentNode;
+        }
+        
+        int i;
         for (i = 0; i < parentNode->freeChildPointer; i++)
         {
-            //printf("assigning %p to cp %d\n", parentNode->childPointers[i]->LRpointers[1], i+1);
-            parentNode->childPointers[i+1] = parentNode->childPointers[i]->LRpointers[1];
+            struct leafNode* tmpChild = (struct leafNode*)parentNode->childPointers[i];
+            parentNode->childPointers[i+1] = (struct node*)tmpChild->LRpointers[1];
         }
-
-        // printf("new : %p\n",newNode);
-        // printf("new left : %p\n",newNode->LRpointers[0]);
-        // printf("new right : %p\n",newNode->LRpointers[1]);
-        // printf("child 1 : %p\n",parentNode->childPointers[0]);
-        // printf("child 2 : %p\n",parentNode->childPointers[1]);
-        // printf("child 3 : %p\n",parentNode->childPointers[2]);
-        
-
-
         parentNode->freeChildPointer = i + 1;
 
     }
-
-
-
-
-
-
 }
 
 void insertionSort(int* arr, int arrSize, struct leafNode* leaf) {
@@ -449,22 +522,27 @@ void moveKeys(struct leafNode* leaf) {
 }
 
 void setParentKeys(struct parentNode* parent){
-    int j;
-    // printf("parent: %p\n", parent);
-
-    // printf("no of child: %d\n", parent->freeChildPointer);
-
-    for (j = 0; j < parent->freeChildPointer - 1; j++)
-    {
-        // printf("J : %d\n",j);
-        // printf("J : %d\n",parent->keys[j]);
-        // printf("J : %d\n",parent->childPointers[j+1]->keys[0]);
-        parent->keys[j] = parent->childPointers[j+1]->keys[0];
-    }
     
-    parent->node.freePointer = j;
-
-    //printf("no of keys: %d\n", parent->node.freePointer);
+    int j;
+    int numOfKeys = 0;
+    printf("no of child : %d\n",parent->freeChildPointer);
+    printChild((struct node*)parent);
+    for (j = 0; j < MAX_PARENT_KEYS; j++)
+    {
+        struct leafNode* tmpChild = (struct leafNode*)parent->childPointers[j+1];
+        if (tmpChild != NULL)
+        {
+            printf("this child: %p\n",tmpChild);
+            parent->keys[j] = tmpChild->keys[0];
+            numOfKeys++;
+        }else{
+            
+            parent->keys[j] = 0;
+        }
+        
+    }
+    parent->node.freePointer = numOfKeys;
+    printf("no of key : %d\n",parent->node.freePointer);
 
     printf("Setting keys of parent node %p\n", parent);
     printNode(parent->keys,MAX_PARENT_KEYS);
