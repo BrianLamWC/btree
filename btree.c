@@ -372,14 +372,15 @@ void splitParents(struct node* oldNode, struct node* newNode){
             newParent->childPointers[i] = tmpChilds[i];
             newParent->freeChildPointer++;
         }
-        
+        printf("parent node %p herere\n",oldParent);
+        printChild((struct node*)oldParent);
         for (int i = 0; i < remainder; i++)
         {
-            printf("getting rid of %p\n ",oldParent->childPointers[oldParent->freeChildPointer - i]);
+            printf("getting rid of %p\n", oldParent->childPointers[(oldParent->freeChildPointer - 1) - i]);
             oldParent->childPointers[(oldParent->freeChildPointer - 1 )- i] = NULL;
-            oldParent->freeChildPointer--;
-        }    
-
+        }
+        printChild((struct node *)oldParent);
+        oldParent->freeChildPointer = remainder;
     }else{
         struct parentNode* tmpParent = (struct parentNode*)oldNode->parentPointer;
         if (tmpParent->freeChildPointer >= MAX_POINTERS)
@@ -523,11 +524,8 @@ void moveKeys(struct leafNode* leaf) {
 
 void setParentKeys(struct parentNode* parent){
     
-    int j;
     int numOfKeys = 0;
-    printf("no of child : %d\n",parent->freeChildPointer);
-    printChild((struct node*)parent);
-    for (j = 0; j < MAX_PARENT_KEYS; j++)
+    for (int j = 0; j < MAX_PARENT_KEYS; j++)
     {
         struct leafNode* tmpChild = (struct leafNode*)parent->childPointers[j+1];
         if (tmpChild != NULL)
@@ -542,9 +540,6 @@ void setParentKeys(struct parentNode* parent){
         
     }
     parent->node.freePointer = numOfKeys;
-    printf("no of key : %d\n",parent->node.freePointer);
-
-    printf("Setting keys of parent node %p\n", parent);
     printNode(parent->keys,MAX_PARENT_KEYS);
 }
 
