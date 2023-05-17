@@ -34,7 +34,7 @@ struct parentNode{
 struct leafNode* createLeafNode();
 void splitLeaf(struct leafNode* leaf, int key);
 void splitParents(struct node* oldNode, struct node* newNode);
-void insertIntoTree(struct node* root, int key);
+void insertIntoTree(struct node* node, int key, struct node* root);
 void insertIntoLeaf(struct leafNode* leaf, int key);
 void insertIntoParent(struct parentNode* parent, int key);
 void removeFromLeaf(struct leafNode* leaf, bool removeFromBack);
@@ -43,7 +43,7 @@ void linkNodes2Parents(struct leafNode* oldNode, struct leafNode* newNode, struc
 void linkParents(struct parentNode* oldParent, struct parentNode* newParent, struct parentNode* newRoot);
 struct node* getRoot(struct node* node);
 bool checkNodeCapacity(struct leafNode* leaf);
-void setParentKeys(struct parentNode* parent);
+void setParentKeys(struct node* parent);
 void printChild(struct node* node);
 
 

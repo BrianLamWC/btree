@@ -42,7 +42,7 @@ int main() {
             scanf("%d", &key);
             getchar(); // consume newline character left in the input buffer by scanf     
 
-            insertIntoTree(root, key);
+            insertIntoTree(root, key,root);
 
         }
         else if (strcmp(input, "delete") == 0)
@@ -58,7 +58,7 @@ int main() {
             for (int i = 1; i < 14; i++)
             {
                 root = getRoot(root);
-                insertIntoTree(root,i);
+                insertIntoTree(root,i,root);
             }
             
         }
