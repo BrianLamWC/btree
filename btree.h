@@ -45,6 +45,7 @@ struct node* getRoot(struct node* node);
 bool checkNodeCapacity(struct leafNode* leaf);
 void setParentKeys(struct node* parent);
 void printChild(struct node* node);
+int checkParentNodeCapacity(struct parentNode* parent);
 
 
 #endif
