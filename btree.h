@@ -27,7 +27,7 @@ struct parentNode{
     struct node node;
     int keys[MAX_PARENT_KEYS];
     int freeChildPointer;
-    struct node* childPointers[MAX_POINTERS];
+    struct node* childPointers[MAX_POINTERS + 1];
     struct parentNode *LRpointers[MAX_LRPOINTERS];
 };
 
@@ -44,7 +44,7 @@ void linkParents(struct parentNode* oldParent, struct parentNode* newParent, str
 struct node* getRoot(struct node* node);
 bool checkNodeCapacity(struct leafNode* leaf);
 void setParentKeys(struct node* parent);
-void printChild(struct node* node);
+void printTree(struct node* node);
 int checkParentNodeCapacity(struct parentNode* parent);
 
 
