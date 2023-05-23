@@ -41,6 +41,7 @@ void removeFromLeaf(struct leafNode* leaf, bool removeFromBack);
 void removeFromParent(struct parentNode* parent);
 void linkNodes2Parents(struct leafNode* oldNode, struct leafNode* newNode, struct parentNode* parentNode);
 void linkParents(struct parentNode* oldParent, struct parentNode* newParent, struct parentNode* newRoot);
+void passToNeighbourParents(struct node* oldNode, struct node* newNode);
 struct node* getRoot(struct node* node);
 bool checkNodeCapacity(struct leafNode* leaf);
 void setParentKeys(struct node* parent);

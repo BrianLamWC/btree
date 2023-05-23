@@ -55,7 +55,7 @@ int main() {
         }
         else if (strcmp(input, "test") == 0)
         {
-            for (int i = 1; i < 49; i++)
+            for (int i = 1; i < 1000000; i++)
             {
                 root = getRoot(root);
                 insertIntoTree(root,i,root);
