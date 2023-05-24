@@ -36,19 +36,17 @@ void splitLeaf(struct leafNode* leaf, int key);
 void splitParents(struct node* oldNode, struct node* newNode);
 void insertIntoTree(struct node* node, int key, struct node* root);
 void insertIntoLeaf(struct leafNode* leaf, int key);
-void insertIntoParent(struct parentNode* parent, int key);
 void removeFromLeaf(struct leafNode* leaf, bool removeFromBack);
-void removeFromParent(struct parentNode* parent);
 void linkNodes2Parents(struct leafNode* oldNode, struct leafNode* newNode, struct parentNode* parentNode);
 void linkParents(struct parentNode* oldParent, struct parentNode* newParent, struct parentNode* newRoot);
 void passToNeighbourParents(struct node* oldNode, struct node* newNode);
 struct node* getRoot(struct node* node);
 bool checkNodeCapacity(struct leafNode* leaf);
-void setParentKeys(struct node* parent);
 void printTree(struct node* node);
 int checkParentNodeCapacity(struct parentNode* parent);
-void setParentKeys2(struct parentNode* parent);
+void setParentKeys(struct parentNode* parent);
 void search(int key,struct node* node);
-
+void moveKeys(struct leafNode *leaf);
+bool checkLeafCapacity(struct leafNode *node);
 
 #endif
