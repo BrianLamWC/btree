@@ -47,6 +47,8 @@ bool checkNodeCapacity(struct leafNode* leaf);
 void setParentKeys(struct node* parent);
 void printTree(struct node* node);
 int checkParentNodeCapacity(struct parentNode* parent);
+void setParentKeys2(struct parentNode* parent);
+void search(int key,struct node* node);
 
 
 #endif

@@ -51,7 +51,12 @@ int main() {
         }
         else if (strcmp(input, "search") == 0)
         {
-            printf("searching key\n");
+            int key;
+            printf("Enter key to search: ");
+            scanf("%d", &key);
+            getchar(); // consume newline character left in the input buffer by scanf
+
+            search(key,root);
         }
         else if (strcmp(input, "test") == 0)
         {
