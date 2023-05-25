@@ -302,6 +302,12 @@ void splitParents(struct node* oldNode, struct node* newNode){
         {
             newParent->childPointers[i] = oldParent->childPointers[remainder + i];
         }
+
+        for (int i = 0; i < newParentNumOfNode; i++)
+        {
+            newParent->childPointers[i]->parentPointer = (struct node*)newParent;
+        }
+
         for (int i = 0; i < newParentNumOfNode; i++)
         {
             oldParent->childPointers[remainder + i] = NULL;
@@ -637,15 +643,15 @@ void search(int key, struct node* node){
 
     while (!node->isLeaf){
         parent = (struct parentNode *)node;
-        printNode(parent->keys,MAX_PARENT_KEYS);
+        //printNode(parent->keys,MAX_PARENT_KEYS);
         int i;
         for ( i = 0; i < parent->node.freePointer; i++)
         {
-            if (key <= parent->keys[i]){
+            if (key < parent->keys[i]){
                 break;
             }
         }
-        printf("I : %d\n",i);
+        //printf("I : %d\n",i);
         if (node->parentPointer == NULL)
         {
             printf("[ ");
@@ -654,7 +660,7 @@ void search(int key, struct node* node){
             printf("]");
         }else{
             struct parentNode* tmpRoot = (struct parentNode*)parent->node.parentPointer;
-            printNode(tmpRoot->keys,MAX_PARENT_KEYS);
+            //printNode(tmpRoot->keys,MAX_PARENT_KEYS);
             for ( int j = 0; j < tmpRoot->freeChildPointer; j++)
             {
                 struct parentNode *tmpChild = (struct parentNode *)tmpRoot->childPointers[j];
@@ -670,18 +676,30 @@ void search(int key, struct node* node){
         printf("↓ traversed to child no: %d\n",i);
     }
 
+
     struct leafNode* leaf = (struct leafNode*)node;
+    struct parentNode* tmpParent = (struct parentNode *)leaf->node.parentPointer;
+    for (int j = 0; j < tmpParent->freeChildPointer; j++)
+    {
+        struct parentNode *tmpChild = (struct parentNode *)tmpParent->childPointers[j];
+        printf("[ ");
+        for (int i = 0; i < MAX_PARENT_KEYS; i++)
+            printf("%d ", tmpChild->keys[i]);
+        printf("]");
+    }
+
+    printf("\n");
 
     for (int k = 0; k < leaf->node.freePointer; k++)
     {
         if (key == leaf->keys[k])
         {
             printNode(leaf->keys,MAX_LEAF_KEYS);
-            printf("Key found %d Key searched: %d\n", parent->keys[k],key);
+            printf("Key found: %d Key searched: %d\n", leaf->keys[k],key);
             return;
         }
     }
-    
+    printf("Leaf node reached: []");
     printNode(leaf->keys, MAX_LEAF_KEYS);
     printf("Key not found\n");
 
