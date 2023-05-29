@@ -55,15 +55,30 @@ int main() {
             printf("Enter key to search: ");
             scanf("%d", &key);
             getchar(); // consume newline character left in the input buffer by scanf
-
             search(key,root);
+
         }
-        else if (strcmp(input, "test") == 0)
+        else if (strcmp(input, "asctest") == 0)
         {
-            for (int i = 1; i < 10000; i++)
+            for (int j = 1; j <= 1000000; j++)
+            {
+                root = getRoot(root);
+                insertIntoTree(root,j,root);
+            }
+        }else if (strcmp(input, "desctest") == 0)
+        {
+            for (int i = 1000000; i >= 1; i--)
             {
                 root = getRoot(root);
                 insertIntoTree(root,i,root);
+            }
+        }
+        else if (strcmp(input, "searchtest") == 0)
+        {
+            for (int i = 100; i >= 1; i--)
+            {
+                root = getRoot(root);
+                search(i,root);
             }
         }
         else

@@ -33,7 +33,7 @@ struct parentNode{
 
 struct leafNode* createLeafNode();
 void splitLeaf(struct leafNode* leaf, int key);
-void splitParents(struct node* oldNode, struct node* newNode);
+void splitParents(struct node* oldNode);
 void insertIntoTree(struct node* node, int key, struct node* root);
 void insertIntoLeaf(struct leafNode* leaf, int key);
 void removeFromLeaf(struct leafNode* leaf, bool removeFromBack);
